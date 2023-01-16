@@ -1,5 +1,4 @@
-let url = 'https://drive.google.com/drive/u/2/folders/1QjPdQeb7MYH8xDA4gaGHKGbYviWoz5JG'
-
+let url = 'https://filebin.net/xrom6qfi37vnnp4i/test.json'
 const j = fetch(url)
     .then((response) => response.json())
     .then((e) => {
@@ -8,6 +7,32 @@ const j = fetch(url)
 
 var el = document.createElement('html')
 
+let readId = "12cTiV6swRJRDiXlCgTbupr4T-UF_eWIt"
+async function downloadFile(realFileId) {
+    // Get credentials and build service
+    // TODO (developer) - Use appropriate auth mechanism for your app
+  
+    const {GoogleAuth} = require('google-auth-library');
+    const {google} = require('googleapis');
+  
+    const auth = new GoogleAuth({
+      scopes: 'https://www.googleapis.com/auth/drive',
+    });
+    const service = google.drive({version: 'v3', auth});
+  
+    fileId = realFileId;
+    try {
+      const file = await service.files.get({
+        fileId: fileId,
+        alt: 'media',
+      });
+      console.log(file.status);
+      return file.status;
+    } catch (err) {
+      // TODO(developer) - Handle error
+      throw err;
+    }
+  }
 
 inputT = []
 document.getElementById('fileInput').addEventListener('change', function selectedFileChanged() {
