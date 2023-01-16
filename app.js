@@ -1,4 +1,4 @@
-let url = 'https://cors-anywhere.herokuapp.com/https://filebin.net/xrom6qfi37vnnp4i/test.json'
+let url = 'https://situla.bitbit.net/filebin/62c5b43d5c04c312b5935e823691d793e3ece77181cdf0dfe47a512a5401a4db/ccabc787fb1dff12fcd2c75b9dfe064266f670317b1efd1072cb6508822c3782?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=HZXB1J7T0UN34UN512IW%2F20230116%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20230116T211552Z&X-Amz-Expires=30&X-Amz-SignedHeaders=host&response-cache-control=max-age%3D30&response-content-disposition=filename%3D%22test.json%22&response-content-type=application%2Fjson&X-Amz-Signature=6ea37e74b131bafb2613c1248ab8b6a290ca51378b9921e670d93014ef56f901'
 
 const j = fetch(url)
     .then((response) => response.json())
