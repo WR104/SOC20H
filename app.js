@@ -9,7 +9,8 @@ quiz1Id = ['1ibU_StlJHZMpLt2tsaPFrnK9ZiZncaF_', '1ATd2Zqp4gz8_qDAw7jY67Q0AqoN5NL
 let el = document.createElement('html')
 var data = []
 let ids = []
-testUrl = ["https://raw.githubusercontent.com/WR104/SOC20H/main/quiz1/1.html", "https://raw.githubusercontent.com/WR104/SOC20H/main/quiz1/2.html"]
+testUrl = ["https://raw.githubusercontent.com/WR104/SOC20H/main/quiz1/1.html", "https://raw.githubusercontent.com/WR104/SOC20H/main/quiz1/2.html",
+    "https://raw.githubusercontent.com/WR104/SOC20H/main/quiz1/KK.html"]
 TotalQuizNum = 5
 
 quizMain = ['1ViK2cmG9bnusamMyL-VpogkZnnIp6eUu', '1sdF4O0Z78QR7gEZdE1aXr1ZPgQn0OY-g',
@@ -18,22 +19,6 @@ quizMain = ['1ViK2cmG9bnusamMyL-VpogkZnnIp6eUu', '1sdF4O0Z78QR7gEZdE1aXr1ZPgQn0O
 
 function getUrl(fileId) {
     return `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${apiKey}`
-}
-
-async function getQuizUrls(index) {
-    fetch(getUrl(quizMain[0]))
-        .then(response => response.json())
-        .then(d => {
-            var result = []
-            for (var i in d.url) {
-                result.push(d.url[i])
-            }
-            console.log(result)
-            return result
-        })
-        .catch(e => {
-            console.log(e)
-        })
 }
 
 async function initIds(index) {
@@ -50,42 +35,13 @@ async function initIds(index) {
         )
 }
 
-function helper(i, totalA) {
-    MatchingAnsId = el.getElementsByClassName("question_id")[a].innerHTML.trim()
-    checkFlag = null
-    while (a < totalA && el.getElementsByClassName("question_id")[a].innerHTML.trim() == MatchingAnsId) {
-        if (el.getElementsByClassName("question_input")[a].outerHTML.toString().includes("checked")) {    //selected
-            if (el.getElementsByClassName("user_points")[i].innerHTML.trim()[0] == 2) {     //correct
-                checkFlag = true
-            }
-            else {
-                checkFlag = false
-            }
-        }
-        answers.push({
-            "string": el.getElementsByClassName("answer_text")[a].innerHTML.trim(),
-            "check": checkFlag
-        })
-        a += 1
-        checkFlag = null
-    }
-    item = {
-        "describe": el.getElementsByClassName("question_text user_content")[i].innerHTML.trim(),
-        "id": el.getElementsByClassName("assessment_question_id")[i].innerHTML.trim(),
-        "answers": answers
-    }
-    data.push(item)
-
-    return a
-}
-
 function print(index) {
     const fetchIds = async () => {
         const response = await fetch(getUrl(quizMain[index]))
         const j = await response.json()
-        for (var i in j.url){
+        for (var i in j.url) {
             var parts = j.url[i].split("/")
-            var id = parts[parts.length-2]
+            var id = parts[parts.length - 2]
             ids.push(id)
         }
     }
@@ -105,41 +61,51 @@ function print(index) {
 
     getTextFromMultipleFiles().then(texts => {
         for (const text in texts) {
-            a = 0   //index for answers
             el.innerHTML = texts[text]
-            totalA = el.getElementsByClassName("answer_text").length
-            for (var i = 0; i < el.getElementsByClassName("question_text user_content").length; i++) {
-                answers = []
-                item = {}
-                if (a < totalA) {
-                    MatchingAnsId = el.getElementsByClassName("question_id")[a].innerHTML.trim()
-                }
-                checkFlag = null
-                while (a < totalA && el.getElementsByClassName("question_id")[a].innerHTML.trim() == MatchingAnsId) {
-                    if (el.getElementsByClassName("question_input")[a].outerHTML.toString().includes("checked")) {    //selected
-                        if (el.getElementsByClassName("user_points")[i].innerHTML.trim()[0] == 2) {     //correct
-                            checkFlag = true
+            totalA = el.getElementsByClassName("question_id").length
+            var question_num = el.getElementsByClassName("question_text user_content").length;
+            for (var i = 0; i < question_num; i++) {
+                var currQuestion = []
+                var questionUrl = el.getElementsByClassName("update_question_url")[i]
+                var questionHref = questionUrl.getAttribute("href");
+                var parts = questionHref.split("/")
+                var question_id = parts[parts.length-1]
+
+
+                var answers = []
+                var idStr = 'question-' + question_id
+                idStr = "input[ name=\"" + idStr + "\" ]"
+                var answersEl = el.querySelectorAll(idStr)
+
+                hrefStr = "a[href=\"" + questionHref + "\"]"
+                const anchor = el.querySelector(hrefStr)
+                const parentDiv = anchor.closest("div").previousElementSibling.previousElementSibling
+                const userPoints = parentDiv.querySelector(".user_points").innerHTML.split('<span')[0].trim()
+                var question_check = userPoints == '2' ? true : false //check the question is right or wrong
+
+                //const userPoints = parentDiv.querySelector(".user_points").innerHTML
+
+                if(answersEl.length != 0){  //multipe and true_false
+                    for(var a=0; a<answersEl.length;a++){
+                        var answer_id = answersEl[a].getAttribute("id")
+                        answerStr = "label[for=\"" + answer_id + "\" ]"
+                        const answer_el = el.querySelector(answerStr)
+                        const answer_string = answer_el.querySelector(".answer_text").innerHTML;
+
+                        var answer_heck = null
+                        if(answersEl[a].outerHTML.includes("checked")){
+                            answer_check = question_check ? true : false
+                        }else{
+                            answer_check = null
                         }
-                        else {
-                            checkFlag = false
-                        }
+                        answers.push({"string" : answer_string, "check" : answer_check})
                     }
-                    answers.push({
-                        "string": el.getElementsByClassName("answer_text")[a].innerHTML.trim(),
-                        "check": checkFlag
-                    })
-                    a += 1
-                    checkFlag = null
                 }
-                item = {
-                    "describe": el.getElementsByClassName("question_text user_content")[i].innerHTML.trim(),
-                    "id": el.getElementsByClassName("assessment_question_id")[i].innerHTML.trim(),
-                    "answers": answers
-                }
-                data.push(item)
+                data.push({"id" : question_id, "string":el.getElementsByClassName("question_text user_content")[i].innerHTML.trim(),
+                "answers": answers})
             }
+
         }
-        console.log(data)
 
         questions = [... new Set(data.map(JSON.stringify))].map(JSON.parse)
         var canvas = document.getElementById('canvas')
@@ -149,7 +115,7 @@ function print(index) {
             var header = document.createElement('a')
             var newline = document.createElement('br')
             newlist.appendChild(header)
-            header.textContent = question.describe
+            header.textContent = question.string
 
             for (const j in question.answers) {
                 var answer = question.answers[j]
